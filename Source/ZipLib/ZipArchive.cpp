@@ -211,6 +211,20 @@ bool ZipArchive::SeekToSignature(uint32_t signature, SeekDirection direction)
   return false;
 }
 
+void ZipArchive::SerializeCentralDirectory(std::streampos offsetCDFH, std::ostream& stream)
+{
+  _endOfCentralDirectoryBlock.NumberOfThisDisk = 0;
+  _endOfCentralDirectoryBlock.NumberOfTheDiskWithTheStartOfTheCentralDirectory = 0;
+
+  _endOfCentralDirectoryBlock.NumberOfEntriesInTheCentralDirectory = static_cast<uint16_t>(_entries.size());
+  _endOfCentralDirectoryBlock.NumberOfEntriesInTheCentralDirectoryOnThisDisk = static_cast<uint16_t>(_entries.size());
+
+  _endOfCentralDirectoryBlock.SizeOfCentralDirectory = static_cast<uint32_t>(stream.tellp() - offsetCDFH);
+  _endOfCentralDirectoryBlock.OffsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber = static_cast<uint32_t>(offsetCDFH);
+  _endOfCentralDirectoryBlock.Serialize(stream);
+}
+
+
 void ZipArchive::WriteToStream(std::ostream& stream)
 {
   auto startPosition = stream.tellp();
@@ -226,15 +240,7 @@ void ZipArchive::WriteToStream(std::ostream& stream)
     entry->SerializeCentralDirectoryFileHeader(stream);
   }
 
-  _endOfCentralDirectoryBlock.NumberOfThisDisk = 0;
-  _endOfCentralDirectoryBlock.NumberOfTheDiskWithTheStartOfTheCentralDirectory = 0;
-
-  _endOfCentralDirectoryBlock.NumberOfEntriesInTheCentralDirectory = static_cast<uint16_t>(_entries.size());
-  _endOfCentralDirectoryBlock.NumberOfEntriesInTheCentralDirectoryOnThisDisk = static_cast<uint16_t>(_entries.size());
-
-  _endOfCentralDirectoryBlock.SizeOfCentralDirectory = static_cast<uint32_t>(stream.tellp() - offsetOfStartOfCDFH);
-  _endOfCentralDirectoryBlock.OffsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber = static_cast<uint32_t>(offsetOfStartOfCDFH);
-  _endOfCentralDirectoryBlock.Serialize(stream);
+  this->SerializeCentralDirectory(offsetOfStartOfCDFH, stream);
 }
 
 void ZipArchive::Swap(ZipArchive::Ptr other)

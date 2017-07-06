@@ -132,6 +132,14 @@ class ZipArchive
     void WriteToStream(std::ostream& stream);
 
     /**
+     * \bried Serializes the CentralDirectory to the stream.
+     *
+     * \param offsetCDFH The offset in the stream of the start of the CDFH
+     * \param stream The stream to write in.
+     */
+    void SerializeCentralDirectory(std::streampos offsetCDFH, std::ostream& stream);
+
+    /**
      * \brief Swaps this instance of ZipArchive with another instance.
      *
      * \param other The instance to swap with.
