@@ -251,7 +251,7 @@ class ZipArchiveEntry
     /**
      * \brief Sets compression stream to be null and unsets the password. The entry would contain no data with zero size.
      */
-    void UnsetCompressionStream();
+    void UnsetCompressionStream(bool onlyFree = false);
 
     /**
      * \brief Gets raw stream of the compressed data.
@@ -296,6 +296,9 @@ class ZipArchiveEntry
      * \brief Removes this entry from the ZipArchive.
      */
     void Remove();
+
+    void SerializeLocalFileHeader(std::ostream& stream);
+    void SerializeCentralDirectoryFileHeader(std::ostream& stream);
 
   private:
     static const uint16_t VERSION_MADEBY_DEFAULT            = 63;
@@ -349,10 +352,7 @@ class ZipArchiveEntry
     std::ios::pos_type GetOffsetOfCompressedData();
     std::ios::pos_type SeekToCompressedData();
 
-    void SerializeLocalFileHeader(std::ostream& stream);
-    void SerializeCentralDirectoryFileHeader(std::ostream& stream);
-
-    void UnloadCompressionData();
+    void UnloadCompressionData(bool onlyFree = false);
     void InternalCompressStream(std::istream& inputStream, std::ostream& outputStream);
 
     // for encryption
